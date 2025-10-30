@@ -1,10 +1,6 @@
-package com.yourname.adslib
+package net.iblankdigital.ads
 
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import kotlinx.coroutines.*
-import net.iblankdigital.ads.AdsConfigs
 import net.iblankdigital.ads.lib.AdsAdmob
 import net.iblankdigital.ads.lib.AdsLovin
 import net.iblankdigital.ads.lib.AdsUnity
