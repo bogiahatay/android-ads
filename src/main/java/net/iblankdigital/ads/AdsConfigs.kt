@@ -6,7 +6,7 @@ data class AdsConfig(
     var adId: String = "",
     var adFullId: String = "",
     var delayShow: Long = 0L,
-    var delayRetry: Long = 5000L
+    var delayRetry: Long = 10000L
 )
 
 object AdsConfigs {
