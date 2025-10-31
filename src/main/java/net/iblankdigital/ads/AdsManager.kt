@@ -58,5 +58,26 @@ class AdsManager {
     fun showUnity(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
         return unity?.show(activity, onDone) ?: false
     }
+
+
+    val timeToShow: Long
+        get() {
+            admob?.timeToShow?.let {
+                if (it > 0) {
+                    return it
+                }
+            }
+            lovin?.timeToShow?.let {
+                if (it > 0) {
+                    return it
+                }
+            }
+            unity?.timeToShow?.let {
+                if (it > 0) {
+                    return it
+                }
+            }
+            return 0
+        }
 }
 

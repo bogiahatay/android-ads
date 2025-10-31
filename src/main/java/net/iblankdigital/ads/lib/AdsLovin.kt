@@ -19,6 +19,8 @@ import androidx.core.net.toUri
 import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdListener
 import com.applovin.mediation.MaxError
+import com.unity3d.ads.BuildConfig
+import java.util.Arrays
 
 internal class AdsLovin(context: Context) : BaseAd(context) {
     override val tag = "AdsLovin"
@@ -31,10 +33,15 @@ internal class AdsLovin(context: Context) : BaseAd(context) {
 
     override fun init() {
         // Create the initialization configuration
-        val conf = AppLovinSdkInitializationConfiguration
+        val builder = AppLovinSdkInitializationConfiguration
             .builder(AdsConfigs.lovinSDK)
             .setMediationProvider(AppLovinMediationProvider.MAX)
-            .build()
+
+        if (AdsConfigs.debug) {
+            builder.testDeviceAdvertisingIds = listOf("1bb166c7-3ac7-462d-ada6-2905e9c8031c")
+        }
+
+        val conf = builder.build()
 
         // Configure the SDK settings if needed before or after SDK initialization.
         val settings = AppLovinSdk.getInstance(context).settings
@@ -45,7 +52,7 @@ internal class AdsLovin(context: Context) : BaseAd(context) {
 
         // Initialize the SDK with the configuration
         AppLovinSdk.getInstance(context).initialize(conf) { sdkConfig: AppLovinSdkConfiguration? ->
-            log("initialize adId=${config.adId} adFullId=${config.adFullId}")
+            log("initialize $config")
             load()
         }
     }
@@ -118,9 +125,9 @@ internal class AdsLovin(context: Context) : BaseAd(context) {
                 onDone.invoke(false, "$tag activity not valid")
                 return false
             }
-            if (!config.active) {
-                log("not active")
-                onDone.invoke(false, "$tag not active")
+            if (config.adFullId.isEmpty()) {
+                log("not active adFullId isEmpty")
+                onDone.invoke(false, "not active adFullId isEmpty")
                 return false
             }
             if (interstitialAd == null || !isLoaded) {
@@ -129,6 +136,7 @@ internal class AdsLovin(context: Context) : BaseAd(context) {
                 onDone.invoke(false, "$tag not ready, retry loading...")
                 return false
             }
+
             if (inDelayBetweenAdsShow()) {
                 log("inDelayBetweenAdsShow ")
                 onDone.invoke(false, "$tag in delay interval between ads")

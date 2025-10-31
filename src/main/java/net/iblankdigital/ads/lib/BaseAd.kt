@@ -45,6 +45,8 @@ internal abstract class BaseAd(val context: Context) {
 
     fun successShow() {
         lastTimeShow = System.currentTimeMillis()
+        log("Delay Show ${config.delayShow}")
+
         if (AdsConfigs.debug) {
             Handler(Looper.getMainLooper()).postDelayed({
                 log("Có thể show QC")

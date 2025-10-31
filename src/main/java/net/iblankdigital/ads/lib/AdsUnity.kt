@@ -9,7 +9,6 @@ import android.os.Looper
 import net.iblankdigital.ads.AdsEvent
 import net.iblankdigital.ads.AdsLogger
 import androidx.core.net.toUri
-import com.unity3d.ads.BuildConfig
 import com.unity3d.ads.IUnityAdsInitializationListener
 import com.unity3d.ads.IUnityAdsLoadListener
 import com.unity3d.ads.IUnityAdsShowListener
@@ -23,17 +22,16 @@ internal class AdsUnity(context: Context) : BaseAd(context) {
 
     //    private var interstitialAd: MaxInterstitialAd? = null
     private val handler = Handler(Looper.getMainLooper())
-    private var onDone: ((Boolean, String) -> Unit)? = null
 
     override fun init() {
-        UnityAds.initialize(context, config.adId, BuildConfig.DEBUG, object : IUnityAdsInitializationListener {
+        UnityAds.initialize(context, config.adId, AdsConfigs.debug, object : IUnityAdsInitializationListener {
             override fun onInitializationComplete() {
-                log("initialize adId=${config.adId} adFullId=${config.adFullId}")
+                log("initialize $config")
                 load()
             }
 
             override fun onInitializationFailed(error: UnityAds.UnityAdsInitializationError?, message: String?) {
-                log("onInitializationFailed $message")
+                log("onInitializationFailed $config")
             }
         })
     }
@@ -73,15 +71,14 @@ internal class AdsUnity(context: Context) : BaseAd(context) {
 
     override fun show(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
         try {
-            this.onDone = onDone
             if (activity.isFinishing || activity.isDestroyed) {
                 log("activity not valid to show ad")
                 onDone.invoke(false, "$tag activity not valid")
                 return false
             }
-            if (!config.active) {
-                log("not active")
-                onDone.invoke(false, "$tag not active")
+            if (config.adFullId.isEmpty()) {
+                log("not active adFullId isEmpty")
+                onDone.invoke(false, "not active adFullId isEmpty")
                 return false
             }
             if (!isLoaded) {

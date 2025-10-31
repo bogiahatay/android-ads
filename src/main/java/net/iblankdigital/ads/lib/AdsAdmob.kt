@@ -23,7 +23,7 @@ internal class AdsAdmob(context: Context) : BaseAd(context) {
 
     override fun init() {
         MobileAds.initialize(context) { initializationStatus: InitializationStatus? ->
-            log("initialize adId=${config.adId} adFullId=${config.adFullId}")
+            log("initialize $config")
             load()
         }
     }
@@ -45,8 +45,9 @@ internal class AdsAdmob(context: Context) : BaseAd(context) {
             override fun onAdLoaded(ad: InterstitialAd) {
                 log("onAdLoaded")
                 interstitialAd = ad
-                interstitialAd
-                interstitialAd?.setImmersiveMode(true)
+                if (config.immersiveMode) {
+                    interstitialAd?.setImmersiveMode(true)
+                }
 
                 isLoaded = true
                 isLoading = false
@@ -74,10 +75,9 @@ internal class AdsAdmob(context: Context) : BaseAd(context) {
                 onDone.invoke(false, "$tag activity not valid")
                 return false
             }
-
-            if (!config.active) {
-                log("not active")
-                onDone.invoke(false, "$tag not active")
+            if (config.adFullId.isEmpty()) {
+                log("not active adFullId isEmpty")
+                onDone.invoke(false, "not active adFullId isEmpty")
                 return false
             }
             if (interstitialAd == null || !isLoaded) {
