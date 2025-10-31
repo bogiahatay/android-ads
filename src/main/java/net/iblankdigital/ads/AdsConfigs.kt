@@ -1,43 +1,45 @@
 package net.iblankdigital.ads
 
+private const val DELAY_RETRY = 15000L
+private const val DELAY_SHOW = 120000L
 
 data class AdsConfig(
     var active: Boolean = true,
     var adId: String = "",
     var adFullId: String = "",
-    var delayShow: Long = 0L,
-    var delayRetry: Long = 10000L
+    var delayShow: Long = DELAY_SHOW,
+    var delayRetry: Long = DELAY_RETRY
 )
 
 object AdsConfigs {
     var debug = true
     var logger = ""
-
     var uuid = ""
     var privacyPolicy = ""
     var termsOfUse = ""
 
     var admob = AdsConfig(
-        active = true,
+        active = false,
         adId = "",
         adFullId = "",
-        delayShow = 120000L,
-        delayRetry = 10000L
+        delayShow = DELAY_SHOW,
+        delayRetry = DELAY_RETRY
     )
 
+    var lovinSDK = ""
     var lovin = AdsConfig(
         active = false,
         adId = "",
-        delayShow = 120000L,
-        delayRetry = 10000L
+        delayShow = DELAY_SHOW,
+        delayRetry = DELAY_RETRY
     )
 
     var unity = AdsConfig(
-        active = true,
+        active = false,
         adId = "",
         adFullId = "",
-        delayShow = 120000L,
-        delayRetry = 10000L
+        delayShow = DELAY_SHOW,
+        delayRetry = DELAY_RETRY
     )
 }
 

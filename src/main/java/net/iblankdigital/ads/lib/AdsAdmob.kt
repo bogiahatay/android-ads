@@ -15,39 +15,37 @@ import net.iblankdigital.ads.AdsConfigs
 import net.iblankdigital.ads.AdsEvent
 import net.iblankdigital.ads.AdsLogger
 
-class AdsAdmob(context: Context) : BaseAd(context) {
+internal class AdsAdmob(context: Context) : BaseAd(context) {
     override val tag = "AdsAdmob"
     override val config = AdsConfigs.admob
-
     private var interstitialAd: InterstitialAd? = null
     private val handler = Handler(Looper.getMainLooper())
 
     override fun init() {
-        if (config.active && config.adId.isNotEmpty() && config.adFullId.isNotEmpty()) {
+        MobileAds.initialize(context) { initializationStatus: InitializationStatus? ->
             log("initialize adId=${config.adId} adFullId=${config.adFullId}")
-            initAdmob()
-        } else {
-            handler.postDelayed(Runnable { this.init() }, 5000)
+            load()
         }
     }
 
-    private fun initAdmob() {
-        MobileAds.initialize(context) { initializationStatus: InitializationStatus? -> load() }
-    }
-
     override fun load() {
+        if (config.adFullId.isEmpty()) {
+            handler.postDelayed(Runnable { this.load() }, 5000)
+            return
+        }
         if (isLoading) {
             log("isLoading..")
             return
         }
         isLoaded = false
         isLoading = true
-
+        log("load: ${config.adFullId}")
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(context, config.adFullId, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) {
                 log("onAdLoaded")
                 interstitialAd = ad
+                interstitialAd
                 interstitialAd?.setImmersiveMode(true)
 
                 isLoaded = true
@@ -65,29 +63,33 @@ class AdsAdmob(context: Context) : BaseAd(context) {
         })
     }
 
-    override fun show(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)?) {
+    override fun canShow(): Boolean {
+        return interstitialAd != null && isLoaded && !inDelayBetweenAdsShow()
+    }
+
+    override fun show(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
         try {
             if (activity.isFinishing || activity.isDestroyed) {
                 log("activity not valid to show ad")
-                onDone?.invoke(false, "$tag activity not valid")
-                return
+                onDone.invoke(false, "$tag activity not valid")
+                return false
             }
 
             if (!config.active) {
                 log("not active")
-                onDone?.invoke(false, "$tag not active")
-                return
+                onDone.invoke(false, "$tag not active")
+                return false
             }
             if (interstitialAd == null || !isLoaded) {
                 log("not ready, retry loading...")
                 reload()
-                onDone?.invoke(false, "$tag not ready, retry loading...")
-                return
+                onDone.invoke(false, "$tag not ready, retry loading...")
+                return false
             }
             if (inDelayBetweenAdsShow()) {
                 log("inDelayBetweenAdsShow ")
-                onDone?.invoke(false, "$tag in delay interval between ads")
-                return
+                onDone.invoke(false, "$tag in delay interval between ads")
+                return false
             }
             interstitialAd?.apply {
                 fullScreenContentCallback = object : FullScreenContentCallback() {
@@ -95,7 +97,8 @@ class AdsAdmob(context: Context) : BaseAd(context) {
                         super.onAdDismissedFullScreenContent()
                         interstitialAd = null
                         logEvent(AdsEvent.Dismissed)
-                        onDone?.invoke(true, AdsEvent.Dismissed.toString())
+                        onDone.invoke(true, AdsEvent.Dismissed.toString())
+                        reload()
                         successShow()
                     }
 
@@ -104,7 +107,7 @@ class AdsAdmob(context: Context) : BaseAd(context) {
                         interstitialAd = null
                         reload()
                         logEvent(AdsEvent.FailedShow)
-                        onDone?.invoke(false, AdsEvent.FailedShow.toString())
+                        onDone.invoke(false, AdsEvent.FailedShow.toString())
                     }
 
                     override fun onAdClicked() {
@@ -123,10 +126,13 @@ class AdsAdmob(context: Context) : BaseAd(context) {
                     }
                 }
                 show(activity)
+                return true
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            onDone?.invoke(false, AdsEvent.FailedShow.toString())
         }
+        onDone.invoke(false, AdsEvent.FailedShow.toString())
+        return false
     }
+
 }

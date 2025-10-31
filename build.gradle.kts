@@ -32,7 +32,11 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
 
-    implementation("com.applovin:applovin-sdk:13.5.0")
-    implementation("com.unity3d.ads:unity-ads:4.16.3")
     implementation("com.google.android.gms:play-services-ads:24.7.0")
+
+    implementation("com.applovin:applovin-sdk:13.5.0")
+    implementation("com.applovin.mediation:google-adapter:24.7.0.0")
+    implementation("com.applovin.mediation:unityads-adapter:4.16.3.0")
+
+    implementation("com.unity3d.ads:unity-ads:4.16.3")
 }

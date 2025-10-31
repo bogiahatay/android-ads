@@ -1,5 +1,6 @@
 package net.iblankdigital.ads
 
+import android.app.Activity
 import android.content.Context
 import net.iblankdigital.ads.lib.AdsAdmob
 import net.iblankdigital.ads.lib.AdsLovin
@@ -25,6 +26,37 @@ class AdsManager {
         unity ?: run {
             unity = AdsUnity(context).apply { init() }
         }
+    }
+
+    fun inDelayBetweenAdsShow(): Boolean {
+        val admobInDelay = admob?.inDelayBetweenAdsShow() ?: false
+        val lovinInDelay = lovin?.inDelayBetweenAdsShow() ?: false
+        val unityInDelay = unity?.inDelayBetweenAdsShow() ?: false
+        return admobInDelay || lovinInDelay || unityInDelay
+    }
+
+    fun canShowAdmob(): Boolean {
+        return admob?.canShow() ?: false
+    }
+
+    fun showAdmob(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
+        return admob?.show(activity, onDone) ?: false
+    }
+
+    fun canShowLovin(): Boolean {
+        return lovin?.canShow() ?: false
+    }
+
+    fun showLovin(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
+        return lovin?.show(activity, onDone) ?: false
+    }
+
+    fun canShowUnity(): Boolean {
+        return unity?.canShow() ?: false
+    }
+
+    fun showUnity(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean {
+        return unity?.show(activity, onDone) ?: false
     }
 }
 

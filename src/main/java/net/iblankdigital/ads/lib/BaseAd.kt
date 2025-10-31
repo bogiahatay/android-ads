@@ -10,7 +10,7 @@ import net.iblankdigital.ads.AdsConfigs
 import net.iblankdigital.ads.AdsEvent
 import net.iblankdigital.ads.AdsLogger
 
-abstract class BaseAd(val context: Context) {
+internal abstract class BaseAd(val context: Context) {
 
     abstract val tag: String
     abstract val config: AdsConfig
@@ -21,9 +21,11 @@ abstract class BaseAd(val context: Context) {
 
     abstract fun init()
     abstract fun load()
-    abstract fun show(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)? = null)
+    abstract fun show(activity: Activity, onDone: ((success: Boolean, message: String) -> Unit)): Boolean
+    abstract fun canShow(): Boolean
 
     protected fun reload() {
+        log("reload after ${config.delayRetry}")
         handler.postDelayed({
             load()
         }, config.delayRetry)
@@ -31,25 +33,32 @@ abstract class BaseAd(val context: Context) {
 
 
     private var lastTimeShow = 0L
+    val timeToShow: Long
+        get() {
+            return config.delayShow - (System.currentTimeMillis() - lastTimeShow)
+        }
 
-    protected fun inDelayBetweenAdsShow(): Boolean {
+    fun inDelayBetweenAdsShow(): Boolean {
         val now = System.currentTimeMillis()
         return now - lastTimeShow < config.delayShow
     }
 
-    protected fun successShow() {
+    fun successShow() {
         lastTimeShow = System.currentTimeMillis()
+        if (AdsConfigs.debug) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                log("Có thể show QC")
+            }, config.delayShow)
+        }
     }
 
     protected fun log(msg: String) {
-        if (AdsConfigs.debug) {
-            Log.e("iBlankDigital-ADS", "[${tag}] $msg")
-        }
+        AdsLogger.log("[${tag}] $msg")
     }
 
     protected fun logEvent(event: AdsEvent) {
         log(event.toString())
-        AdsLogger.log(tag, event.toString())
+        AdsLogger.logEvent(tag, event.toString())
     }
 
 }
