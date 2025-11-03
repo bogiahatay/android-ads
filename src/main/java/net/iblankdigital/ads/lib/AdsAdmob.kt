@@ -43,7 +43,7 @@ internal class AdsAdmob(context: Context) : BaseAd(context) {
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(context, config.adFullId, adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) {
-                log("onAdLoaded")
+                log("onAdLoaded: immersiveMode=${config.immersiveMode}")
                 interstitialAd = ad
                 if (config.immersiveMode) {
                     interstitialAd?.setImmersiveMode(true)
